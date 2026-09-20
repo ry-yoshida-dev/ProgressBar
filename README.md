@@ -29,7 +29,7 @@ Iterate over a collection and let the backend be chosen automatically:
 ```python
 from progress_bar import ProgressBarReporter
 
-for item in ProgressBarReporter(description="Loading").track(range(100)):
+for item in ProgressBarReporter(description="Loading").report(range(100)):
     handle(item)
 ```
 

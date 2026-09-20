@@ -41,7 +41,7 @@ class BackendShowcase:
     def _run_automatic(self) -> None:
         print("[auto] iterating over a list")
         reporter = ProgressBarReporter(description="auto")
-        for _ in reporter.track(range(self._steps)):
+        for _ in reporter.report(range(self._steps)):
             time.sleep(self._step_duration)
 
     def _run_backend(self, backend: ProgressBarBackend) -> None:

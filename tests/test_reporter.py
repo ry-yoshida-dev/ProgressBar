@@ -33,20 +33,20 @@ class TestProgressBarReporter:
             assert reporter.completed == 3
         assert not reporter.is_active
 
-    def test_track_infers_the_total_from_a_sized_iterable(self) -> None:
+    def test_report_infers_the_total_from_a_sized_iterable(self) -> None:
         reporter = self._build()
-        assert list(reporter.track([1, 2, 3])) == [1, 2, 3]
+        assert list(reporter.report([1, 2, 3])) == [1, 2, 3]
         assert reporter.settings.total == 3
 
-    def test_track_of_an_empty_iterable_reports_an_empty_task(self) -> None:
+    def test_report_of_an_empty_iterable_reports_an_empty_task(self) -> None:
         reporter = self._build()
         empty_items: list[int] = []
-        assert list(reporter.track(empty_items)) == []
+        assert list(reporter.report(empty_items)) == []
         assert reporter.settings.total == 0
 
-    def test_track_supports_an_iterator_without_length(self) -> None:
+    def test_report_supports_an_iterator_without_length(self) -> None:
         reporter = self._build()
-        assert list(reporter.track(iter([1, 2]))) == [1, 2]
+        assert list(reporter.report(iter([1, 2]))) == [1, 2]
         assert reporter.settings.total is None
 
     def test_disabled_reporter_uses_the_silent_backend(self) -> None:

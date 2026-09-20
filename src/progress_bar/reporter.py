@@ -123,7 +123,7 @@ class ProgressBarReporter:
         self._renderer = renderer
 
     def advance(self, step: int = 1) -> None:
-        """Report completed steps.
+        """Record completed steps.
 
         Parameters
         ----------
@@ -150,7 +150,7 @@ class ProgressBarReporter:
         self._renderer = None
         renderer.finish()
 
-    def track[ItemT](self, iterable: Iterable[ItemT]) -> Iterator[ItemT]:
+    def report[ItemT](self, iterable: Iterable[ItemT]) -> Iterator[ItemT]:
         """Yield the items of ``iterable`` while advancing the bar.
 
         The task is started and finished automatically unless it is

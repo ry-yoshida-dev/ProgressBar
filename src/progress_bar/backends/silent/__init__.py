@@ -1,4 +1,4 @@
-"""Backend that tracks progress without producing output."""
+"""Backend that counts steps without producing output."""
 
 from progress_bar.backends.silent.renderer import SilentRenderer
 
