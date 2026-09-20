@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator, Sized
+from collections.abc import Generator, Iterable, Sized
 from dataclasses import replace
 from types import TracebackType
 
@@ -150,12 +150,17 @@ class ProgressBarReporter:
         self._renderer = None
         renderer.finish()
 
-    def report[ItemT](self, iterable: Iterable[ItemT]) -> Iterator[ItemT]:
+    def report[ItemT](self, iterable: Iterable[ItemT]) -> Generator[ItemT, None, None]:
         """Yield the items of ``iterable`` while advancing the bar.
 
         The task is started and finished automatically unless it is
         already running. When the total is unknown and ``iterable`` has a
         length, that length becomes the total.
+
+        A caller that stops early leaves the task running until the
+        generator is closed, so the return type is a generator rather than
+        a plain iterator: ``close`` finalizes the bar, and
+        ``contextlib.closing`` makes that explicit at the call site.
 
         Parameters
         ----------
@@ -166,6 +171,15 @@ class ProgressBarReporter:
         ------
         ItemT
             The items of ``iterable``, unchanged.
+
+        Examples
+        --------
+        >>> from contextlib import closing
+        >>> reporter = ProgressBarReporter(total=100)
+        >>> with closing(reporter.report(range(100))) as items:
+        ...     for item in items:
+        ...         if item > 10:
+        ...             break
         """
         if self._renderer is None:
             self._adopt_length_of(iterable)

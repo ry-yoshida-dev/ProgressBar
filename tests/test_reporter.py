@@ -49,6 +49,19 @@ class TestProgressBarReporter:
         assert list(reporter.report(iter([1, 2]))) == [1, 2]
         assert reporter.settings.total is None
 
+    def test_closing_the_report_finalizes_a_task_left_running(self) -> None:
+        reporter = self._build(total=3)
+        items = reporter.report([1, 2, 3])
+        assert next(items) == 1
+        assert reporter.is_active
+        items.close()
+        assert not reporter.is_active
+
+    def test_exhausting_the_report_finalizes_the_task(self) -> None:
+        reporter = self._build(total=3)
+        assert list(reporter.report([1, 2, 3])) == [1, 2, 3]
+        assert not reporter.is_active
+
     def test_disabled_reporter_uses_the_silent_backend(self) -> None:
         reporter = ProgressBarReporter(total=2, is_enabled=False)
         assert reporter.backend is ProgressBarBackend.SILENT

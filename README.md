@@ -33,6 +33,19 @@ for item in ProgressBarReporter(description="Loading").report(range(100)):
     handle(item)
 ```
 
+`report` returns a generator, so a loop that stops early leaves the bar open
+until the generator is closed. Wrap it in `contextlib.closing` when a
+reference to it outlives the loop:
+
+```python
+from contextlib import closing
+
+with closing(ProgressBarReporter(total=100).report(range(100))) as items:
+    for item in items:
+        if is_enough(item):
+            break
+```
+
 Report steps manually when the work is not a simple loop:
 
 ```python
