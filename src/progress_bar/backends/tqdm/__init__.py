@@ -1,5 +1,5 @@
 """Backend rendering with the ``tqdm`` package."""
 
-from progress_bar.backends.tqdm.adapter import TqdmAdapter
+from progress_bar.backends.tqdm.renderer import TqdmRenderer
 
-__all__ = ["TqdmAdapter"]
+__all__ = ["TqdmRenderer"]

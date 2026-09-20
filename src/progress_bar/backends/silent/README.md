@@ -10,4 +10,4 @@ it is the backend used by the tests.
 
 | Component | Responsibility |
 | --- | --- |
-| [adapter.py](adapter.py) | `SilentAdapter`, a no-op implementation of the reporter lifecycle. |
+| [renderer.py](renderer.py) | `SilentRenderer`, a no-op implementation of the renderer lifecycle. |

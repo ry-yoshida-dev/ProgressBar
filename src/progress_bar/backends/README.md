@@ -3,10 +3,10 @@
 ## Overview
 
 One sub-package per rendering technique, each translating the
-`ProgressReporter` lifecycle (`_open`, `_render`, `_close`) into the API of its
+`ProgressRenderer` lifecycle (`_open`, `_render`, `_close`) into the API of its
 library. A sub-package imports its third-party library at module level and is
-itself imported on demand by `ReporterFactory`, so an uninstalled optional
-package never breaks an unrelated backend. The adapter classes are also exposed
+itself imported on demand by `RendererFactory`, so an uninstalled optional
+package never breaks an unrelated backend. The renderer classes are also exposed
 lazily from this package, which keeps `import progress_bar.backends` free of
 optional dependencies.
 

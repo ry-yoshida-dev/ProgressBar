@@ -14,4 +14,4 @@ Install with `pip install ".[rich]"`.
 
 | Component | Responsibility |
 | --- | --- |
-| [adapter.py](adapter.py) | `RichAdapter`, driving one task of `rich.progress.Progress`. |
+| [renderer.py](renderer.py) | `RichRenderer`, driving one task of `rich.progress.Progress`. |

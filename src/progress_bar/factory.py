@@ -1,23 +1,23 @@
-"""Construction of reporters for a concrete backend."""
+"""Construction of renderers for a concrete backend."""
 
 from __future__ import annotations
 
 from progress_bar.backend import ProgressBarBackend
 from progress_bar.environment import RenderEnvironment
-from progress_bar.reporter import ProgressReporter
+from progress_bar.renderer import ProgressRenderer
 from progress_bar.settings import ProgressSettings
 
 
-class ReporterFactory:
-    """Creates the reporter implementing a given backend.
+class RendererFactory:
+    """Creates the renderer implementing a given backend.
 
-    Adapter modules are imported on demand so that an uninstalled
+    Renderer modules are imported on demand so that an uninstalled
     optional package never breaks an unrelated backend.
 
     Parameters
     ----------
     environment
-        Environment passed to every created reporter. A new
+        Environment passed to every created renderer. A new
         :class:`~progress_bar.environment.RenderEnvironment` bound to
         ``sys.stderr`` is used when omitted.
     """
@@ -25,15 +25,10 @@ class ReporterFactory:
     def __init__(self, environment: RenderEnvironment | None = None) -> None:
         self._environment = RenderEnvironment() if environment is None else environment
 
-    @property
-    def environment(self) -> RenderEnvironment:
-        """Environment passed to every created reporter."""
-        return self._environment
-
     def create(
         self, backend: ProgressBarBackend, settings: ProgressSettings
-    ) -> ProgressReporter:
-        """Build a reporter for ``backend``.
+    ) -> ProgressRenderer:
+        """Build a renderer for ``backend``.
 
         Parameters
         ----------
@@ -44,8 +39,8 @@ class ReporterFactory:
 
         Returns
         -------
-        ProgressReporter
-            Reporter that has not been started yet.
+        ProgressRenderer
+            Renderer that has not been started yet.
 
         Raises
         ------
@@ -54,26 +49,31 @@ class ReporterFactory:
         """
         match backend:
             case ProgressBarBackend.TQDM:
-                from progress_bar.backends.tqdm import TqdmAdapter
+                from progress_bar.backends.tqdm import TqdmRenderer
 
-                return TqdmAdapter(settings, self._environment)
+                return TqdmRenderer(settings, self._environment)
             case ProgressBarBackend.PROGRESSBAR2:
-                from progress_bar.backends.progressbar2 import ProgressBar2Adapter
+                from progress_bar.backends.progressbar2 import ProgressBar2Renderer
 
-                return ProgressBar2Adapter(settings, self._environment)
+                return ProgressBar2Renderer(settings, self._environment)
             case ProgressBarBackend.ALIVE_PROGRESS:
-                from progress_bar.backends.alive_progress import AliveProgressAdapter
+                from progress_bar.backends.alive_progress import AliveProgressRenderer
 
-                return AliveProgressAdapter(settings, self._environment)
+                return AliveProgressRenderer(settings, self._environment)
             case ProgressBarBackend.RICH:
-                from progress_bar.backends.rich import RichAdapter
+                from progress_bar.backends.rich import RichRenderer
 
-                return RichAdapter(settings, self._environment)
+                return RichRenderer(settings, self._environment)
             case ProgressBarBackend.PLAIN:
-                from progress_bar.backends.plain import PlainAdapter
+                from progress_bar.backends.plain import PlainRenderer
 
-                return PlainAdapter(settings, self._environment)
+                return PlainRenderer(settings, self._environment)
             case ProgressBarBackend.SILENT:
-                from progress_bar.backends.silent import SilentAdapter
+                from progress_bar.backends.silent import SilentRenderer
 
-                return SilentAdapter(settings, self._environment)
+                return SilentRenderer(settings, self._environment)
+
+    @property
+    def environment(self) -> RenderEnvironment:
+        """Environment passed to every created renderer."""
+        return self._environment

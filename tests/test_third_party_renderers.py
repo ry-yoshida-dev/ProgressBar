@@ -1,4 +1,4 @@
-"""Tests for the adapters wrapping an optional third-party library."""
+"""Tests for the renderers wrapping an optional third-party library."""
 
 from __future__ import annotations
 
@@ -11,13 +11,13 @@ from progress_bar import (
     ProgressBarBackend,
     ProgressSettings,
     RenderEnvironment,
-    ReporterFactory,
+    RendererFactory,
 )
 from tests.terminal_stream_stub import TerminalStreamStub
 
 
-class TestThirdPartyAdapters:
-    """Lifecycle of every adapter that renders with an optional package."""
+class TestThirdPartyRenderers:
+    """Lifecycle of every renderer that uses an optional package."""
 
     THIRD_PARTY_BACKENDS: Final[tuple[ProgressBarBackend, ...]] = (
         ProgressBarBackend.TQDM,
@@ -36,46 +36,46 @@ class TestThirdPartyAdapters:
         self, backend: ProgressBarBackend
     ) -> None:
         stream = self._create_stream(backend)
-        reporter = ReporterFactory(RenderEnvironment(stream)).create(
+        renderer = RendererFactory(RenderEnvironment(stream)).create(
             backend, ProgressSettings(total=4, description="load")
         )
-        with reporter:
-            assert reporter.is_active
+        with renderer:
+            assert renderer.is_active
             for _ in range(4):
-                reporter.advance()
-        assert reporter.backend is backend
-        assert reporter.completed == 4
-        assert not reporter.is_active
+                renderer.advance()
+        assert renderer.backend is backend
+        assert renderer.completed == 4
+        assert not renderer.is_active
         assert stream.getvalue() != ""
 
     @pytest.mark.parametrize("backend", THIRD_PARTY_BACKENDS)
     def test_unknown_total_is_supported(self, backend: ProgressBarBackend) -> None:
         stream = self._create_stream(backend)
-        reporter = ReporterFactory(RenderEnvironment(stream)).create(
+        renderer = RendererFactory(RenderEnvironment(stream)).create(
             backend, ProgressSettings(description="stream")
         )
-        with reporter:
-            reporter.advance(3)
-        assert reporter.completed == 3
+        with renderer:
+            renderer.advance(3)
+        assert renderer.completed == 3
 
     @pytest.mark.parametrize("backend", THIRD_PARTY_BACKENDS)
     def test_empty_task_is_supported(self, backend: ProgressBarBackend) -> None:
         stream = self._create_stream(backend)
-        reporter = ReporterFactory(RenderEnvironment(stream)).create(
+        renderer = RendererFactory(RenderEnvironment(stream)).create(
             backend, ProgressSettings(total=0, description="empty")
         )
-        with reporter:
+        with renderer:
             pass
-        assert reporter.completed == 0
+        assert renderer.completed == 0
 
     @pytest.mark.parametrize("backend", THIRD_PARTY_BACKENDS)
     def test_transient_bar_is_closed_without_error(
         self, backend: ProgressBarBackend
     ) -> None:
         stream = self._create_stream(backend)
-        reporter = ReporterFactory(RenderEnvironment(stream)).create(
+        renderer = RendererFactory(RenderEnvironment(stream)).create(
             backend, ProgressSettings(total=2, is_leave_visible=False)
         )
-        with reporter:
-            reporter.advance(2)
-        assert not reporter.is_active
+        with renderer:
+            renderer.advance(2)
+        assert not renderer.is_active

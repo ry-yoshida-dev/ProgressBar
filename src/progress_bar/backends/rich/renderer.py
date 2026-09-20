@@ -1,4 +1,4 @@
-"""Progress reporting backed by :mod:`rich.progress`."""
+"""Progress bar rendered with :mod:`rich.progress`."""
 
 from __future__ import annotations
 
@@ -17,12 +17,12 @@ from rich.progress import (
 
 from progress_bar.backend import ProgressBarBackend
 from progress_bar.environment import RenderEnvironment
-from progress_bar.reporter import ProgressReporter
+from progress_bar.renderer import ProgressRenderer
 from progress_bar.settings import ProgressSettings
 
 
-class RichAdapter(ProgressReporter):
-    """Reporter rendering with the ``rich`` package.
+class RichRenderer(ProgressRenderer):
+    """Renderer using the ``rich`` package.
 
     Parameters
     ----------
@@ -38,11 +38,6 @@ class RichAdapter(ProgressReporter):
         super().__init__(settings, environment)
         self._progress: Progress | None = None
         self._task_id: TaskID | None = None
-
-    @property
-    def backend(self) -> ProgressBarBackend:
-        """Backend this reporter renders with."""
-        return ProgressBarBackend.RICH
 
     def _open(self) -> None:
         progress = Progress(
@@ -80,3 +75,8 @@ class RichAdapter(ProgressReporter):
             MofNCompleteColumn(),
             TimeRemainingColumn(),
         )
+
+    @property
+    def backend(self) -> ProgressBarBackend:
+        """Backend implemented by this renderer."""
+        return ProgressBarBackend.RICH

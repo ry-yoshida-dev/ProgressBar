@@ -1,75 +1,75 @@
-"""Backends binding each optional library to the reporter interface.
+"""Backends binding each optional library to the renderer interface.
 
 Each backend lives in its own sub-package and imports its third-party
-library at module level. The adapter classes are therefore exposed
+library at module level. The renderer classes are therefore exposed
 lazily here, so importing this package never imports an optional library
 that may not be installed.
 """
 
 from typing import TYPE_CHECKING
 
-from progress_bar.reporter import ProgressReporter
+from progress_bar.renderer import ProgressRenderer
 
 if TYPE_CHECKING:
-    from progress_bar.backends.alive_progress import AliveProgressAdapter
-    from progress_bar.backends.plain import PlainAdapter
-    from progress_bar.backends.progressbar2 import ProgressBar2Adapter
-    from progress_bar.backends.rich import RichAdapter
-    from progress_bar.backends.silent import SilentAdapter
-    from progress_bar.backends.tqdm import TqdmAdapter
+    from progress_bar.backends.alive_progress import AliveProgressRenderer
+    from progress_bar.backends.plain import PlainRenderer
+    from progress_bar.backends.progressbar2 import ProgressBar2Renderer
+    from progress_bar.backends.rich import RichRenderer
+    from progress_bar.backends.silent import SilentRenderer
+    from progress_bar.backends.tqdm import TqdmRenderer
 
 __all__ = [
-    "AliveProgressAdapter",
-    "PlainAdapter",
-    "ProgressBar2Adapter",
-    "RichAdapter",
-    "SilentAdapter",
-    "TqdmAdapter",
+    "AliveProgressRenderer",
+    "PlainRenderer",
+    "ProgressBar2Renderer",
+    "RichRenderer",
+    "SilentRenderer",
+    "TqdmRenderer",
 ]
 
 
-def __getattr__(name: str) -> type[ProgressReporter]:
-    """Import an adapter class on first access.
+def __getattr__(name: str) -> type[ProgressRenderer]:
+    """Import a renderer class on first access.
 
     Parameters
     ----------
     name
-        Name of the adapter class to import.
+        Name of the renderer class to import.
 
     Returns
     -------
-    type[ProgressReporter]
-        The requested adapter class.
+    type[ProgressRenderer]
+        The requested renderer class.
 
     Raises
     ------
     AttributeError
-        If ``name`` is not an adapter of this package.
+        If ``name`` is not a renderer of this package.
     """
     match name:
-        case "TqdmAdapter":
-            from progress_bar.backends.tqdm import TqdmAdapter
+        case "TqdmRenderer":
+            from progress_bar.backends.tqdm import TqdmRenderer
 
-            return TqdmAdapter
-        case "ProgressBar2Adapter":
-            from progress_bar.backends.progressbar2 import ProgressBar2Adapter
+            return TqdmRenderer
+        case "ProgressBar2Renderer":
+            from progress_bar.backends.progressbar2 import ProgressBar2Renderer
 
-            return ProgressBar2Adapter
-        case "AliveProgressAdapter":
-            from progress_bar.backends.alive_progress import AliveProgressAdapter
+            return ProgressBar2Renderer
+        case "AliveProgressRenderer":
+            from progress_bar.backends.alive_progress import AliveProgressRenderer
 
-            return AliveProgressAdapter
-        case "RichAdapter":
-            from progress_bar.backends.rich import RichAdapter
+            return AliveProgressRenderer
+        case "RichRenderer":
+            from progress_bar.backends.rich import RichRenderer
 
-            return RichAdapter
-        case "PlainAdapter":
-            from progress_bar.backends.plain import PlainAdapter
+            return RichRenderer
+        case "PlainRenderer":
+            from progress_bar.backends.plain import PlainRenderer
 
-            return PlainAdapter
-        case "SilentAdapter":
-            from progress_bar.backends.silent import SilentAdapter
+            return PlainRenderer
+        case "SilentRenderer":
+            from progress_bar.backends.silent import SilentRenderer
 
-            return SilentAdapter
+            return SilentRenderer
         case _:
             raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

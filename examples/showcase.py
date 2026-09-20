@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 
-from progress_bar import BackendResolver, ProgressBarBackend, ProgressTracker
+from progress_bar import BackendResolver, ProgressBarBackend, ProgressBarReporter
 
 
 class BackendShowcase:
@@ -40,18 +40,18 @@ class BackendShowcase:
 
     def _run_automatic(self) -> None:
         print("[auto] iterating over a list")
-        tracker = ProgressTracker(description="auto")
-        for _ in tracker.track(range(self._steps)):
+        reporter = ProgressBarReporter(description="auto")
+        for _ in reporter.track(range(self._steps)):
             time.sleep(self._step_duration)
 
     def _run_backend(self, backend: ProgressBarBackend) -> None:
         print(f"[{backend.value}] manual stepping")
-        with ProgressTracker(
+        with ProgressBarReporter(
             total=self._steps, description=backend.value, backend=backend
-        ) as tracker:
+        ) as reporter:
             for _ in range(self._steps):
                 time.sleep(self._step_duration)
-                tracker.advance()
+                reporter.advance()
 
 
 if __name__ == "__main__":

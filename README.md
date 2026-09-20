@@ -27,19 +27,19 @@ pip install -e ".[dev]"     # backends plus mypy, pytest and ruff
 Iterate over a collection and let the backend be chosen automatically:
 
 ```python
-from progress_bar import ProgressTracker
+from progress_bar import ProgressBarReporter
 
-for item in ProgressTracker(description="Loading").track(range(100)):
+for item in ProgressBarReporter(description="Loading").track(range(100)):
     handle(item)
 ```
 
 Report steps manually when the work is not a simple loop:
 
 ```python
-with ProgressTracker(total=100, description="Copying", unit="file") as tracker:
+with ProgressBarReporter(total=100, description="Copying", unit="file") as reporter:
     for chunk in chunks:
         copy(chunk)
-        tracker.advance(len(chunk))
+        reporter.advance(len(chunk))
 ```
 
 A total of zero describes an empty task and renders a completed bar, and a
@@ -49,19 +49,19 @@ empty batch needs a special case at the call site.
 Pin a backend, or turn the display off entirely:
 
 ```python
-from progress_bar import ProgressBarBackend, ProgressTracker
+from progress_bar import ProgressBarBackend, ProgressBarReporter
 
-tracker = ProgressTracker(total=10, backend=ProgressBarBackend.RICH)
-quiet = ProgressTracker(total=10, is_enabled=False)
+reporter = ProgressBarReporter(total=10, backend=ProgressBarBackend.RICH)
+quiet = ProgressBarReporter(total=10, is_enabled=False)
 ```
 
 Inspect and change the choice at runtime:
 
 ```python
-tracker = ProgressTracker(total=10)
-print(tracker.backend)  # the backend that will be used
-print(tracker.installed_backends)  # everything importable right now
-tracker.switch_to(ProgressBarBackend.TQDM)
+reporter = ProgressBarReporter(total=10)
+print(reporter.backend)  # the backend that will be used
+print(reporter.installed_backends)  # everything importable right now
+reporter.switch_to(ProgressBarBackend.TQDM)
 ```
 
 `examples/showcase.py` runs the same workload through every installed backend.

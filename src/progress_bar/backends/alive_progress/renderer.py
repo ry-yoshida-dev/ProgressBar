@@ -1,4 +1,4 @@
-"""Progress reporting backed by :mod:`alive_progress`."""
+"""Progress bar rendered with :mod:`alive_progress`."""
 
 from __future__ import annotations
 
@@ -10,15 +10,15 @@ from alive_progress import alive_bar
 from progress_bar.backend import ProgressBarBackend
 from progress_bar.backends.alive_progress.bar_handle import AliveBarHandle
 from progress_bar.environment import RenderEnvironment
-from progress_bar.reporter import ProgressReporter
+from progress_bar.renderer import ProgressRenderer
 from progress_bar.settings import ProgressSettings
 
 
-class AliveProgressAdapter(ProgressReporter):
-    """Reporter rendering with the ``alive-progress`` package.
+class AliveProgressRenderer(ProgressRenderer):
+    """Renderer using the ``alive-progress`` package.
 
     The underlying bar is a context manager, so its scope is kept open by
-    an :class:`~contextlib.ExitStack` for the lifetime of the reporter.
+    an :class:`~contextlib.ExitStack` for the lifetime of the renderer.
 
     Parameters
     ----------
@@ -34,11 +34,6 @@ class AliveProgressAdapter(ProgressReporter):
         super().__init__(settings, environment)
         self._stack = ExitStack()
         self._handle: AliveBarHandle | None = None
-
-    @property
-    def backend(self) -> ProgressBarBackend:
-        """Backend this reporter renders with."""
-        return ProgressBarBackend.ALIVE_PROGRESS
 
     def _open(self) -> None:
         bar_context = cast(
@@ -60,3 +55,8 @@ class AliveProgressAdapter(ProgressReporter):
     def _close(self) -> None:
         self._handle = None
         self._stack.close()
+
+    @property
+    def backend(self) -> ProgressBarBackend:
+        """Backend implemented by this renderer."""
+        return ProgressBarBackend.ALIVE_PROGRESS

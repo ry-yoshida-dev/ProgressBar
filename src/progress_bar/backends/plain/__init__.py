@@ -1,5 +1,5 @@
 """Dependency-free backend for terminals and log files."""
 
-from progress_bar.backends.plain.adapter import PlainAdapter
+from progress_bar.backends.plain.renderer import PlainRenderer
 
-__all__ = ["PlainAdapter"]
+__all__ = ["PlainRenderer"]

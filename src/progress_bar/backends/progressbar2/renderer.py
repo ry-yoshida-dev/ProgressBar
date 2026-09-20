@@ -1,4 +1,4 @@
-"""Progress reporting backed by :mod:`progressbar` (the progressbar2 package)."""
+"""Progress bar rendered with :mod:`progressbar` (the progressbar2 package)."""
 
 from __future__ import annotations
 
@@ -6,12 +6,12 @@ import progressbar
 
 from progress_bar.backend import ProgressBarBackend
 from progress_bar.environment import RenderEnvironment
-from progress_bar.reporter import ProgressReporter
+from progress_bar.renderer import ProgressRenderer
 from progress_bar.settings import ProgressSettings
 
 
-class ProgressBar2Adapter(ProgressReporter):
-    """Reporter rendering with the ``progressbar2`` package.
+class ProgressBar2Renderer(ProgressRenderer):
+    """Renderer using the ``progressbar2`` package.
 
     Parameters
     ----------
@@ -26,11 +26,6 @@ class ProgressBar2Adapter(ProgressReporter):
     ) -> None:
         super().__init__(settings, environment)
         self._bar: progressbar.ProgressBar | None = None
-
-    @property
-    def backend(self) -> ProgressBarBackend:
-        """Backend this reporter renders with."""
-        return ProgressBarBackend.PROGRESSBAR2
 
     def _open(self) -> None:
         total = self._settings.total
@@ -53,3 +48,8 @@ class ProgressBar2Adapter(ProgressReporter):
             return
         self._bar.finish(end="\n" if self._settings.is_leave_visible else "\r")
         self._bar = None
+
+    @property
+    def backend(self) -> ProgressBarBackend:
+        """Backend implemented by this renderer."""
+        return ProgressBarBackend.PROGRESSBAR2

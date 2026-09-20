@@ -13,4 +13,4 @@ Install with `pip install ".[tqdm]"`.
 
 | Component | Responsibility |
 | --- | --- |
-| [adapter.py](adapter.py) | `TqdmAdapter`, driving a `tqdm` instance through the reporter lifecycle. |
+| [renderer.py](renderer.py) | `TqdmRenderer`, driving a `tqdm` instance through the renderer lifecycle. |

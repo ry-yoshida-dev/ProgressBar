@@ -1,15 +1,15 @@
-"""Dependency-free progress reporting for plain text streams."""
+"""Dependency-free progress bar rendered on a plain text stream."""
 
 from __future__ import annotations
 
 from progress_bar.backend import ProgressBarBackend
 from progress_bar.environment import RenderEnvironment
-from progress_bar.reporter import ProgressReporter
+from progress_bar.renderer import ProgressRenderer
 from progress_bar.settings import ProgressSettings
 
 
-class PlainAdapter(ProgressReporter):
-    """Reporter writing a textual bar without any third-party package.
+class PlainRenderer(ProgressRenderer):
+    """Renderer writing a textual bar without any third-party package.
 
     On an interactive terminal the line is redrawn in place. On a
     redirected stream a new line is emitted only when a milestone is
@@ -34,11 +34,6 @@ class PlainAdapter(ProgressReporter):
         super().__init__(settings, environment)
         self._last_logged_milestone = 0
         self._last_written_line = ""
-
-    @property
-    def backend(self) -> ProgressBarBackend:
-        """Backend this reporter renders with."""
-        return ProgressBarBackend.PLAIN
 
     def _open(self) -> None:
         self._last_logged_milestone = 0
@@ -91,3 +86,8 @@ class PlainAdapter(ProgressReporter):
         filled = int(self._BAR_WIDTH * ratio)
         bar = "#" * filled + "-" * (self._BAR_WIDTH - filled)
         return f"{label}[{bar}] {ratio * 100:5.1f}% ({self._completed}/{total})"
+
+    @property
+    def backend(self) -> ProgressBarBackend:
+        """Backend implemented by this renderer."""
+        return ProgressBarBackend.PLAIN

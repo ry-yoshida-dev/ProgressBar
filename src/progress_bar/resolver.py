@@ -47,16 +47,6 @@ class BackendResolver:
         self._priority = tuple(self.DEFAULT_PRIORITY if priority is None else priority)
         self._installation_cache: dict[ProgressBarBackend, bool] = {}
 
-    @property
-    def environment(self) -> RenderEnvironment:
-        """Environment the backends are resolved for."""
-        return self._environment
-
-    @property
-    def priority(self) -> tuple[ProgressBarBackend, ...]:
-        """Backends tried in order during automatic resolution."""
-        return self._priority
-
     def is_installed(self, backend: ProgressBarBackend) -> bool:
         """Whether the package required by ``backend`` can be imported.
 
@@ -130,3 +120,13 @@ class BackendResolver:
             + f"'{backend.distribution_name}'; install it with "
             + f"'pip install {backend.distribution_name}'"
         )
+
+    @property
+    def environment(self) -> RenderEnvironment:
+        """Environment the backends are resolved for."""
+        return self._environment
+
+    @property
+    def priority(self) -> tuple[ProgressBarBackend, ...]:
+        """Backends tried in order during automatic resolution."""
+        return self._priority

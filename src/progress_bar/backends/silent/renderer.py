@@ -1,22 +1,17 @@
-"""Progress reporting that renders nothing."""
+"""Progress bar that renders nothing."""
 
 from __future__ import annotations
 
 from progress_bar.backend import ProgressBarBackend
-from progress_bar.reporter import ProgressReporter
+from progress_bar.renderer import ProgressRenderer
 
 
-class SilentAdapter(ProgressReporter):
-    """Reporter that tracks progress without producing any output.
+class SilentRenderer(ProgressRenderer):
+    """Renderer that counts steps without producing any output.
 
     It is selected when progress display is disabled, which keeps calling
     code free of conditional branches.
     """
-
-    @property
-    def backend(self) -> ProgressBarBackend:
-        """Backend this reporter renders with."""
-        return ProgressBarBackend.SILENT
 
     def _open(self) -> None:
         return
@@ -26,3 +21,8 @@ class SilentAdapter(ProgressReporter):
 
     def _close(self) -> None:
         return
+
+    @property
+    def backend(self) -> ProgressBarBackend:
+        """Backend implemented by this renderer."""
+        return ProgressBarBackend.SILENT

@@ -12,4 +12,4 @@ instead of repeating the last milestone.
 
 | Component | Responsibility |
 | --- | --- |
-| [adapter.py](adapter.py) | `PlainAdapter`, formatting and writing the bar to the output stream. |
+| [renderer.py](renderer.py) | `PlainRenderer`, formatting and writing the bar to the output stream. |

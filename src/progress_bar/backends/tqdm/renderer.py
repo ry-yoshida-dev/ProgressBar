@@ -1,4 +1,4 @@
-"""Progress reporting backed by :mod:`tqdm`."""
+"""Progress bar rendered with :mod:`tqdm`."""
 
 from __future__ import annotations
 
@@ -8,12 +8,12 @@ from tqdm.auto import tqdm
 
 from progress_bar.backend import ProgressBarBackend
 from progress_bar.environment import RenderEnvironment
-from progress_bar.reporter import ProgressReporter
+from progress_bar.renderer import ProgressRenderer
 from progress_bar.settings import ProgressSettings
 
 
-class TqdmAdapter(ProgressReporter):
-    """Reporter rendering with the ``tqdm`` package.
+class TqdmRenderer(ProgressRenderer):
+    """Renderer using the ``tqdm`` package.
 
     Parameters
     ----------
@@ -28,11 +28,6 @@ class TqdmAdapter(ProgressReporter):
     ) -> None:
         super().__init__(settings, environment)
         self._bar: tqdm[Never] | None = None
-
-    @property
-    def backend(self) -> ProgressBarBackend:
-        """Backend this reporter renders with."""
-        return ProgressBarBackend.TQDM
 
     def _open(self) -> None:
         self._bar = tqdm(
@@ -53,3 +48,8 @@ class TqdmAdapter(ProgressReporter):
             return
         self._bar.close()
         self._bar = None
+
+    @property
+    def backend(self) -> ProgressBarBackend:
+        """Backend implemented by this renderer."""
+        return ProgressBarBackend.TQDM
