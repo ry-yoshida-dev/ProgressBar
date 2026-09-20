@@ -1,0 +1,67 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "progress-bar"
+version = "0.1.0"
+description = "Runtime-switchable progress bars over tqdm, progressbar2, alive-progress and rich"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+keywords = ["progress", "progressbar", "tqdm", "rich", "alive-progress"]
+classifiers = [
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Terminals",
+    "Typing :: Typed",
+]
+dependencies = []
+
+[project.optional-dependencies]
+tqdm = ["tqdm>=4.66"]
+progressbar2 = ["progressbar2>=4.3"]
+alive-progress = ["alive-progress>=3.1"]
+rich = ["rich>=13.0"]
+all = ["tqdm>=4.66", "progressbar2>=4.3", "alive-progress>=3.1", "rich>=13.0"]
+dev = [
+    "tqdm>=4.66",
+    "progressbar2>=4.3",
+    "alive-progress>=3.1",
+    "rich>=13.0",
+    "types-tqdm>=4.66",
+    "mypy>=1.10",
+    "pytest>=8.0",
+    "ruff>=0.5",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/progress_bar"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+src = ["src", "tests", "examples"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["progress_bar"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "tests", "examples"]
+mypy_path = "src"
+
+[tool.basedpyright]
+include = ["src", "tests", "examples"]
+typeCheckingMode = "strict"
+pythonVersion = "3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"
