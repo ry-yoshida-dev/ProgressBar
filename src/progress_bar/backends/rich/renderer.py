@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from rich.console import Console
+from rich.markup import escape
 from rich.progress import (
     BarColumn,
     MofNCompleteColumn,
@@ -47,7 +48,7 @@ class RichRenderer(ProgressRenderer):
         )
         progress.start()
         self._task_id = progress.add_task(
-            self._settings.description or "working",
+            escape(self._settings.description or "working"),
             total=self._settings.total,
         )
         self._progress = progress
