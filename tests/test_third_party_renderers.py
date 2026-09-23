@@ -8,6 +8,7 @@ import pytest
 
 from progress_bar import (
     BackendResolver,
+    GroupRendererFactory,
     ProgressBarBackend,
     ProgressSettings,
     RenderEnvironment,
@@ -79,3 +80,42 @@ class TestThirdPartyRenderers:
         with renderer:
             renderer.advance(2)
         assert not renderer.is_active
+
+
+class TestThirdPartyGroupRenderers:
+    """Lifecycle of every group renderer that uses an optional package."""
+
+    GROUP_BACKENDS: Final[tuple[ProgressBarBackend, ...]] = (
+        ProgressBarBackend.TQDM,
+        ProgressBarBackend.PROGRESSBAR2,
+        ProgressBarBackend.RICH,
+    )
+
+    @pytest.mark.parametrize("backend", GROUP_BACKENDS)
+    def test_bars_are_added_advanced_and_finished_independently(
+        self, backend: ProgressBarBackend
+    ) -> None:
+        if not BackendResolver().is_installed(backend):
+            pytest.skip(f"{backend.distribution_name} is not installed")
+        stream = TerminalStreamStub()
+        renderer = GroupRendererFactory(RenderEnvironment(stream)).create(backend)
+        with renderer:
+            renderer.add_bar("kept", ProgressSettings(total=3, description="kept"))
+            renderer.add_bar(
+                "gone",
+                ProgressSettings(total=2, description="gone", is_leave_visible=False),
+            )
+            renderer.add_bar("unknown", ProgressSettings(description="unknown"))
+            renderer.advance_bar("kept", 3)
+            renderer.advance_bar("gone", 2)
+            renderer.advance_bar("unknown", 5)
+            assert renderer.completed_of("unknown") == 5
+            renderer.finish_bar("gone")
+            keys_after_removal: tuple[str, ...] = renderer.open_keys
+            assert keys_after_removal == ("kept", "unknown")
+            renderer.add_bar("next", ProgressSettings(total=1, description="next"))
+        assert renderer.backend is backend
+        keys_after_close: tuple[str, ...] = renderer.open_keys
+        assert not renderer.is_active
+        assert keys_after_close == ()
+        assert "kept" in stream.getvalue()

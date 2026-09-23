@@ -17,3 +17,9 @@ class TestProgressBarBackend:
         assert not ProgressBarBackend.PLAIN.is_third_party
         assert not ProgressBarBackend.SILENT.is_third_party
         assert ProgressBarBackend.RICH.is_third_party
+
+    def test_only_alive_progress_cannot_display_a_group(self) -> None:
+        unsupported = [
+            backend for backend in ProgressBarBackend if not backend.is_group_supported
+        ]
+        assert unsupported == [ProgressBarBackend.ALIVE_PROGRESS]

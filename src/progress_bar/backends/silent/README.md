@@ -11,3 +11,4 @@ it is the backend used by the tests.
 | Component | Responsibility |
 | --- | --- |
 | [renderer.py](renderer.py) | `SilentRenderer`, a no-op implementation of the renderer lifecycle. |
+| [group_renderer.py](group_renderer.py) | `SilentGroupRenderer`, a no-op implementation of the group renderer lifecycle. |

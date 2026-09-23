@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Sequence
 from importlib.util import find_spec
 from typing import Final
@@ -92,6 +93,38 @@ class BackendResolver:
             return ProgressBarBackend.PLAIN
         for backend in self._priority:
             if self.is_installed(backend):
+                return backend
+        return ProgressBarBackend.PLAIN
+
+    def resolve_group(
+        self, preferred: ProgressBarBackend | None = None
+    ) -> ProgressBarBackend:
+        """Return the backend to render a group of concurrent bars with.
+
+        Follows the rules of :meth:`resolve`, restricted to the backends
+        whose :attr:`~ProgressBarBackend.is_group_supported` is true. A
+        preferred backend that cannot display several bars is replaced by
+        the automatic choice, with a warning, rather than drawing a single
+        bar that the other bars of the group would overwrite.
+
+        Parameters
+        ----------
+        preferred
+            Backend requested by the caller, or ``None`` to choose
+            automatically.
+        """
+        if preferred is not None and not preferred.is_group_supported:
+            warnings.warn(
+                f"backend {preferred.value} cannot display several bars at once; "
+                + "choosing another backend for the progress bar group",
+                stacklevel=2,
+            )
+        elif preferred is not None and self.is_installed(preferred):
+            return preferred
+        if not self._environment.is_rich_rendering_supported:
+            return ProgressBarBackend.PLAIN
+        for backend in self._priority:
+            if backend.is_group_supported and self.is_installed(backend):
                 return backend
         return ProgressBarBackend.PLAIN
 

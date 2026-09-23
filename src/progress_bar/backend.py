@@ -66,3 +66,22 @@ class ProgressBarBackend(Enum):
     def is_third_party(self) -> bool:
         """Whether the backend needs an external package to be installed."""
         return self.module_name != ""
+
+    @property
+    def is_group_supported(self) -> bool:
+        """Whether the backend can display several bars at the same time.
+
+        ``alive_progress`` draws a single bar that owns the terminal until it
+        finishes, so it cannot render a :class:`~progress_bar.ProgressBarGroup`.
+        """
+        match self:
+            case ProgressBarBackend.ALIVE_PROGRESS:
+                return False
+            case (
+                ProgressBarBackend.TQDM
+                | ProgressBarBackend.PROGRESSBAR2
+                | ProgressBarBackend.RICH
+                | ProgressBarBackend.PLAIN
+                | ProgressBarBackend.SILENT
+            ):
+                return True

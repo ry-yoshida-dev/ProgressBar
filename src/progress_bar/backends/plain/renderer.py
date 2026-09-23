@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from progress_bar.backend import ProgressBarBackend
+from progress_bar.backends.plain.formatter import PlainBarFormatter
 from progress_bar.environment import RenderEnvironment
 from progress_bar.renderer import ProgressRenderer
 from progress_bar.settings import ProgressSettings
@@ -24,14 +25,11 @@ class PlainRenderer(ProgressRenderer):
         Output stream and terminal capabilities to render with.
     """
 
-    _BAR_WIDTH = 30
-    _LOG_PERCENT_STEP = 10
-    _LOG_COUNT_STEP = 100
-
     def __init__(
         self, settings: ProgressSettings, environment: RenderEnvironment
     ) -> None:
         super().__init__(settings, environment)
+        self._formatter = PlainBarFormatter()
         self._last_logged_milestone = 0
         self._last_written_line = ""
 
@@ -45,7 +43,7 @@ class PlainRenderer(ProgressRenderer):
         if self._environment.is_terminal:
             self._write_line(self._format_line(), "\r")
             return
-        milestone = self._current_milestone()
+        milestone = self._formatter.milestone(self._settings, self._completed)
         if milestone > self._last_logged_milestone:
             self._last_logged_milestone = milestone
             self._write_line(self._format_line(), "\n")
@@ -68,24 +66,8 @@ class PlainRenderer(ProgressRenderer):
         self._environment.stream.write(text)
         self._environment.stream.flush()
 
-    def _current_milestone(self) -> int:
-        total = self._settings.total
-        if total is None:
-            return self._completed // self._LOG_COUNT_STEP
-        if total == 0:
-            return 100 // self._LOG_PERCENT_STEP
-        percent = self._completed * 100 // total
-        return percent // self._LOG_PERCENT_STEP
-
     def _format_line(self) -> str:
-        label = f"{self._settings.description}: " if self._settings.description else ""
-        total = self._settings.total
-        if total is None:
-            return f"{label}{self._completed} {self._settings.unit}"
-        ratio = 1.0 if total == 0 else min(self._completed / total, 1.0)
-        filled = int(self._BAR_WIDTH * ratio)
-        bar = "#" * filled + "-" * (self._BAR_WIDTH - filled)
-        return f"{label}[{bar}] {ratio * 100:5.1f}% ({self._completed}/{total})"
+        return self._formatter.format_line(self._settings, self._completed)
 
     @property
     def backend(self) -> ProgressBarBackend:

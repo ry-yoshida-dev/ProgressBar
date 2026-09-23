@@ -79,6 +79,47 @@ reporter.switch_to(ProgressBarBackend.TQDM)
 
 `examples/showcase.py` runs the same workload through every installed backend.
 
+## Concurrent Bars
+
+`ProgressBarGroup` displays several bars at once, each on a line of its own,
+drawn by one backend so they never overwrite each other. Bars can be added and
+finished at any time while the group is open, and advanced from any thread:
+
+```python
+from progress_bar import ProgressBarGroup
+
+with ProgressBarGroup() as group:
+    for scene in group.report(scenes, description="Scenes", unit="scene"):
+        bars = [
+            group.add(
+                total=len(camera),
+                description=f"{scene} [{camera}]",
+                is_leave_visible=False,
+            )
+            for camera in scene.cameras
+        ]
+        ...
+```
+
+`group.add()` returns a bar that is already displayed; `advance()`, `finish()`,
+`report()` and the context manager work as on `ProgressBarReporter`. A bar with
+`is_leave_visible=False` disappears when it finishes, and finishing the group
+finishes every bar still open.
+
+Worker processes add bars to the same display through `group.remote()`, a
+picklable proxy that forwards their progress over a queue. The queue only
+reaches a child through inheritance, so pass the proxy when the process is
+created, for example through `ProcessPoolExecutor(initializer=...,
+initargs=(group.remote(),))`; see [src/progress_bar/group/remote/](src/progress_bar/group/remote/README.md).
+Code that only adds bars can be typed against `ProgressBarSource` and run
+unchanged in the parent and in a worker. Prefer the `spawn` or `forkserver`
+start method, since the group runs a listener thread and `fork` copies a
+multi-threaded process.
+
+Every backend except `alive_progress`, whose bar owns the terminal, can render
+a group. A group that asks for `alive_progress` warns and uses the automatic
+choice instead.
+
 ## Backend Selection
 
 `BackendResolver` applies the following rules, in order:
@@ -92,6 +133,8 @@ reporter.switch_to(ProgressBarBackend.TQDM)
 
 A missing package therefore degrades the display instead of raising. Use
 `BackendResolver.require()` when a specific backend is mandatory.
+`BackendResolver.resolve_group()` applies the same rules to a group, skipping
+the backends that cannot display several bars at once.
 
 ## Development
 
