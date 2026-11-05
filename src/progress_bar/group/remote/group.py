@@ -26,8 +26,8 @@ class RemoteProgressBarGroup(ProgressBarSource):
     Parameters
     ----------
     queue
-        Queue drained by the group, or ``None`` when the group does not
-        display anything, which turns every bar into a silent counter.
+        Queue drained by the group, or ``None`` to send nothing, which
+        turns every bar into a counter read only in this process.
     """
 
     def __init__(self, queue: Queue[RemoteBarEvent | None] | None) -> None:
@@ -87,5 +87,5 @@ class RemoteProgressBarGroup(ProgressBarSource):
 
     @property
     def is_enabled(self) -> bool:
-        """Whether the bars reach a group that displays them."""
+        """Whether the bars reach the group of the parent process."""
         return self._queue is not None

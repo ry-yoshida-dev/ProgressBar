@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import multiprocessing
+import time
 from concurrent.futures import ProcessPoolExecutor
 from multiprocessing.queues import Queue
 
@@ -82,6 +83,32 @@ class TestRemoteProgressBar:
         rendered = stream.getvalue()
         for index in range(3):
             assert f"worker {index}: [{'#' * 30}] 100.0% (20/20)" in rendered
+
+    def test_worker_bars_of_a_disabled_group_are_read_through_snapshots(
+        self,
+    ) -> None:
+        context = multiprocessing.get_context("spawn")
+        with ProgressBarGroup(is_enabled=False, context=context) as group:
+            remote = group.remote()
+            assert remote.is_enabled
+            with ProcessPoolExecutor(
+                max_workers=1,
+                mp_context=context,
+                initializer=RemoteWorkerStub.initialize,
+                initargs=(remote,),
+            ) as executor:
+                executor.submit(
+                    RemoteWorkerStub.run_without_finishing, "worker", 3
+                ).result()
+            deadline = time.monotonic() + 5.0
+            while time.monotonic() < deadline:
+                snapshots = group.snapshot()
+                if snapshots and snapshots[0].completed == 3:
+                    break
+                time.sleep(0.01)
+            (bar,) = group.snapshot()
+            assert bar.settings.description == "worker"
+            assert bar.fraction == 1.0
 
     def test_remote_of_a_remote_group_is_the_same_proxy(self) -> None:
         remote = RemoteProgressBarGroup(None)

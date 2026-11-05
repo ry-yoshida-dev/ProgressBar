@@ -116,6 +116,22 @@ unchanged in the parent and in a worker. Prefer the `spawn` or `forkserver`
 start method, since the group runs a listener thread and `fork` copies a
 multi-threaded process.
 
+`group.snapshot()` reads how far every open bar is, from any thread, as
+`ProgressBarSnapshot`s with the settings, the steps completed, the seconds
+elapsed, the fraction and an estimate of the time left. A group made with
+`is_enabled=False` draws nothing and is only read this way, so that a server
+can tell its clients how far a task is. The bars of worker processes, added
+through `group.remote()`, are read as well. A bar leaves the snapshots as soon
+as it finishes:
+
+```python
+group = ProgressBarGroup(is_enabled=False)
+group.start()
+# on a worker thread: run(progress=group)
+# on a worker process: run(progress=remote), with remote = group.remote()
+# on a request: [(bar.settings.description, bar.fraction) for bar in group.snapshot()]
+```
+
 Every backend except `alive_progress`, whose bar owns the terminal, can render
 a group. A group that asks for `alive_progress` warns and uses the automatic
 choice instead.

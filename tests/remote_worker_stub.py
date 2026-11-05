@@ -12,7 +12,8 @@ class RemoteWorkerStub:
 
     :meth:`initialize` is the pool initializer, since the queue behind a
     :class:`RemoteProgressBarGroup` can only reach a worker through
-    inheritance, and :meth:`run` is the submitted task.
+    inheritance, and :meth:`run` and :meth:`run_without_finishing` are the
+    submitted tasks.
     """
 
     _group: ClassVar[RemoteProgressBarGroup | None] = None
@@ -51,10 +52,7 @@ class RemoteWorkerStub:
         RuntimeError
             If the worker was not initialized with a group.
         """
-        group = RemoteWorkerStub._group
-        if group is None:
-            raise RuntimeError("the worker was not initialized with a group")
-        task = group.add(
+        task = RemoteWorkerStub._require_group().add(
             total=step_count,
             description=description,
             is_leave_visible=is_leave_visible,
@@ -62,3 +60,38 @@ class RemoteWorkerStub:
         for _ in task.report(range(step_count)):
             pass
         return task.completed
+
+    @staticmethod
+    def run_without_finishing(description: str, step_count: int) -> int:
+        """Report ``step_count`` steps of one bar of the group and leave it open.
+
+        Parameters
+        ----------
+        description
+            Label of the bar.
+        step_count
+            Number of steps to report, also the total of the bar so that the
+            last step is sent at once.
+
+        Returns
+        -------
+        int
+            Number of steps the bar recorded.
+
+        Raises
+        ------
+        RuntimeError
+            If the worker was not initialized with a group.
+        """
+        task = RemoteWorkerStub._require_group().add(
+            total=step_count, description=description
+        )
+        task.advance(step_count)
+        return task.completed
+
+    @staticmethod
+    def _require_group() -> RemoteProgressBarGroup:
+        group = RemoteWorkerStub._group
+        if group is None:
+            raise RuntimeError("the worker was not initialized with a group")
+        return group

@@ -11,6 +11,8 @@ from progress_bar import (
     GroupRendererFactory,
     ProgressBarBackend,
     ProgressBarGroup,
+    ProgressBarSnapshot,
+    ProgressSettings,
     RenderEnvironment,
 )
 from tests.terminal_stream_stub import TerminalStreamStub
@@ -138,7 +140,6 @@ class TestProgressBarGroup:
         )
         with group:
             group.add(total=2, description="hidden").advance(2)
-            assert not group.remote().is_enabled
         assert group.backend is ProgressBarBackend.SILENT
         assert stream.getvalue() == ""
 
@@ -160,3 +161,75 @@ class TestProgressBarGroup:
             rendered = stream.getvalue()
             assert list(items) == [1, 2]
         assert 0 <= rendered.index("first: [") < rendered.index("second: [")
+
+    def test_snapshot_reads_the_open_bars_in_the_order_added(self) -> None:
+        with self._build() as group:
+            first = group.add(total=4, description="first", unit="file")
+            second = group.add(description="second")
+            first.advance(1)
+            second.advance(3)
+            snapshots = group.snapshot()
+            assert [bar.settings.description for bar in snapshots] == [
+                "first",
+                "second",
+            ]
+            assert [bar.completed for bar in snapshots] == [1, 3]
+            assert snapshots[0].settings.unit == "file"
+            assert snapshots[0].fraction == 0.25
+            assert snapshots[1].fraction is None
+            assert all(bar.elapsed_seconds >= 0 for bar in snapshots)
+            first.finish()
+            assert [bar.settings.description for bar in group.snapshot()] == ["second"]
+
+    def test_snapshot_of_an_idle_group_is_empty(self) -> None:
+        group = self._build()
+        assert group.snapshot() == ()
+        with group:
+            group.add(total=1)
+        assert group.snapshot() == ()
+
+    def test_disabled_group_is_read_through_snapshots(self) -> None:
+        with ProgressBarGroup(is_enabled=False) as group:
+            group.add(total=2, description="steps").advance()
+            (bar,) = group.snapshot()
+            assert bar.completed == 1
+
+
+class TestProgressBarSnapshot:
+    """Fractions and estimates of :class:`ProgressBarSnapshot`."""
+
+    def test_estimate_follows_the_pace_so_far(self) -> None:
+        bar = ProgressBarSnapshot(ProgressSettings(total=4), 1, 10.0)
+        assert bar.estimate_remaining_seconds() == pytest.approx(30.0)
+
+    def test_estimate_waits_for_the_minimums(self) -> None:
+        bar = ProgressBarSnapshot(ProgressSettings(total=100), 2, 10.0)
+        assert bar.estimate_remaining_seconds(minimum_fraction=0.05) is None
+        assert bar.estimate_remaining_seconds(minimum_elapsed_seconds=20.0) is None
+
+    def test_no_estimate_without_a_total_or_a_step(self) -> None:
+        assert ProgressBarSnapshot(ProgressSettings(), 5, 1.0).fraction is None
+        assert (
+            ProgressBarSnapshot(ProgressSettings(), 5, 1.0).estimate_remaining_seconds()
+            is None
+        )
+        assert (
+            ProgressBarSnapshot(
+                ProgressSettings(total=3), 0, 1.0
+            ).estimate_remaining_seconds()
+            is None
+        )
+
+    def test_empty_task_is_complete(self) -> None:
+        bar = ProgressBarSnapshot(ProgressSettings(total=0), 0, 0.0)
+        assert bar.fraction == 1.0
+
+    def test_negative_counts_are_rejected(self) -> None:
+        with pytest.raises(ValueError):
+            ProgressBarSnapshot(ProgressSettings(total=1), -1, 0.0)
+        with pytest.raises(ValueError):
+            ProgressBarSnapshot(ProgressSettings(total=1), 0, -1.0)
+        with pytest.raises(ValueError):
+            ProgressBarSnapshot(
+                ProgressSettings(total=1), 0, 0.0
+            ).estimate_remaining_seconds(minimum_fraction=2.0)

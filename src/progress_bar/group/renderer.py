@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import time
 from abc import ABC, abstractmethod
 from types import TracebackType
 
 from progress_bar.backend import ProgressBarBackend
 from progress_bar.environment import RenderEnvironment
+from progress_bar.group.snapshot import ProgressBarSnapshot
 from progress_bar.settings import ProgressSettings
 
 
@@ -32,6 +34,7 @@ class ProgressGroupRenderer(ABC):
         self._environment = environment
         self._settings_by_key: dict[str, ProgressSettings] = {}
         self._completed_by_key: dict[str, int] = {}
+        self._started_at_by_key: dict[str, float] = {}
         self._is_active = False
 
     def start(self) -> None:
@@ -69,6 +72,7 @@ class ProgressGroupRenderer(ABC):
             raise ValueError(f"a bar with key {key!r} is already open")
         self._settings_by_key[key] = settings
         self._completed_by_key[key] = 0
+        self._started_at_by_key[key] = time.monotonic()
         self._add_bar(key, settings)
 
     def advance_bar(self, key: str, step: int = 1) -> None:
@@ -117,6 +121,7 @@ class ProgressGroupRenderer(ABC):
         self._finish_bar(key)
         del self._settings_by_key[key]
         del self._completed_by_key[key]
+        del self._started_at_by_key[key]
 
     def finish(self) -> None:
         """Finish every open bar and close the group, ignoring an idle group."""
@@ -151,6 +156,24 @@ class ProgressGroupRenderer(ABC):
             If no open bar has the key.
         """
         return self._completed_by_key[key]
+
+    def snapshot(self) -> tuple[ProgressBarSnapshot, ...]:
+        """Read how far every open bar is.
+
+        Returns
+        -------
+        tuple[ProgressBarSnapshot, ...]
+            One snapshot per open bar, in the order the bars were added.
+        """
+        now = time.monotonic()
+        return tuple(
+            ProgressBarSnapshot(
+                settings=settings,
+                completed=self._completed_by_key[key],
+                elapsed_seconds=now - self._started_at_by_key[key],
+            )
+            for key, settings in self._settings_by_key.items()
+        )
 
     def __enter__(self) -> ProgressGroupRenderer:
         self.start()

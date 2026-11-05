@@ -16,6 +16,7 @@ from progress_bar.group.remote.event import RemoteBarEvent
 from progress_bar.group.remote.group import RemoteProgressBarGroup
 from progress_bar.group.remote.listener import RemoteEventListener
 from progress_bar.group.renderer import ProgressGroupRenderer
+from progress_bar.group.snapshot import ProgressBarSnapshot
 from progress_bar.group.source import ProgressBarSource
 from progress_bar.resolver import BackendResolver
 from progress_bar.settings import ProgressSettings
@@ -37,8 +38,9 @@ class ProgressBarGroup(ProgressBarSource):
         is replaced by the automatic choice, with a warning.
     is_enabled
         Whether progress is displayed at all. When ``False`` the silent
-        backend is used, no output is produced, and :meth:`remote` hands
-        out bars that send nothing.
+        backend is used and no output is produced, while the bars of every
+        thread and of the workers of :meth:`remote` are still counted, so
+        :meth:`snapshot` reads them.
     environment
         Environment the bars are rendered in.
     context
@@ -176,8 +178,6 @@ class ProgressBarGroup(ProgressBarSource):
         """
         with self._lock:
             self._require_renderer()
-            if self._backend is ProgressBarBackend.SILENT:
-                return RemoteProgressBarGroup(None)
             if self._listener is None:
                 queue: Queue[RemoteBarEvent | None] = self._context.Queue()
                 listener = RemoteEventListener(queue, self)
@@ -231,6 +231,26 @@ class ProgressBarGroup(ProgressBarSource):
         with self._lock:
             if self._renderer is not None:
                 self._renderer.finish_bar(key)
+
+    def snapshot(self) -> tuple[ProgressBarSnapshot, ...]:
+        """Read how far every open bar is, from any thread.
+
+        The bars are read whatever backend draws them, including the bars
+        of worker processes, so a group made with ``is_enabled=False``
+        reports progress that is shown elsewhere, such as by a server that
+        clients ask how far a task is.
+
+        Returns
+        -------
+        tuple[ProgressBarSnapshot, ...]
+            One snapshot per open bar, in the order the bars were added,
+            and none while the group is not displayed. A finished bar is
+            no longer included.
+        """
+        with self._lock:
+            if self._renderer is None:
+                return ()
+            return self._renderer.snapshot()
 
     def __enter__(self) -> ProgressBarGroup:
         self.start()
