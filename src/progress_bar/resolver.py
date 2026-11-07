@@ -79,7 +79,9 @@ class BackendResolver:
         An installed ``preferred`` backend always wins. Otherwise the
         first installed backend of :attr:`priority` is used, and
         :attr:`ProgressBarBackend.PLAIN` serves as the last resort for
-        redirected streams and environments without extra packages.
+        redirected streams and environments without extra packages. A
+        missing package therefore degrades the display instead of raising;
+        use :meth:`require` when a specific backend is mandatory.
 
         Parameters
         ----------

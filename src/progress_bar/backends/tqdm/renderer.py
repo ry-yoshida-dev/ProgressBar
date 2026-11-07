@@ -15,6 +15,9 @@ from progress_bar.settings import ProgressSettings
 class TqdmRenderer(ProgressRenderer):
     """Renderer using the ``tqdm`` package.
 
+    ``tqdm.auto`` is used, so the notebook widget is picked up inside
+    Jupyter. An unknown total is rendered as a running counter.
+
     Parameters
     ----------
     settings

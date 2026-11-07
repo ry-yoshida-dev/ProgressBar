@@ -2,13 +2,9 @@
 
 ## Overview
 
-Runtime-switchable progress bars. `ProgressBarReporter` is the entry point for
-a single bar: it resolves a backend with `BackendResolver`, builds the matching
-renderer with `RendererFactory`, and exposes a context manager plus an iterator
-wrapper. `ProgressBarGroup`, in `group/`, is the entry point for bars that run
-side by side, from any thread or worker process. Every backend implements the
-single-bar interface, and every backend but `alive_progress` the group one, so
-calling code never depends on the library that ends up drawing the bars.
+Runtime-switchable progress bars. `ProgressBarReporter` is the entry point for a single bar and `ProgressBarGroup` for
+bars that run side by side; every backend implements `ProgressRenderer`, so calling code never depends on the library
+that draws the bars.
 
 ## Components
 
@@ -21,8 +17,8 @@ calling code never depends on the library that ends up drawing the bars.
 | [resolver.py](resolver.py) | `BackendResolver`, which picks an installed backend suited to the environment. |
 | [factory.py](factory.py) | `RendererFactory`, which imports and instantiates the renderer of a backend. |
 | [reporter.py](reporter.py) | `ProgressBarReporter`, the public facade for a single bar. |
-| [group/](group/) | `ProgressBarGroup` and its bars, displayed together from threads or worker processes. |
-| [backends/](backends/) | One sub-package per rendering technique, each adapting a library to `ProgressRenderer`. |
+| [group/](group/README.md) | `ProgressBarGroup` and its bars, displayed together from threads or worker processes. |
+| [backends/](backends/README.md) | One sub-package per rendering technique, each adapting a library to `ProgressRenderer`. |
 | [py.typed](py.typed) | Marker declaring the package as typed for static analysers. |
 
 ## Examples

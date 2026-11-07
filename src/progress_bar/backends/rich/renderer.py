@@ -25,6 +25,11 @@ from progress_bar.settings import ProgressSettings
 class RichRenderer(ProgressRenderer):
     """Renderer using the ``rich`` package.
 
+    A ``Progress`` instance holds a single task. A known total shows a bar
+    with percentage, counter and remaining time; an unknown total shows a
+    spinner with a counter. The description is escaped, so square brackets
+    are shown as written instead of being read as markup.
+
     Parameters
     ----------
     settings

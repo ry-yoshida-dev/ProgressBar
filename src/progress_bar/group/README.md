@@ -2,17 +2,9 @@
 
 ## Overview
 
-Bars that run side by side. `ProgressBarGroup` resolves a backend with
-`BackendResolver.resolve_group`, builds one `ProgressGroupRenderer` with
-`GroupRendererFactory`, and hands out a `GroupedProgressBar` per bar. It
-serializes every call to the renderer, so bars can be added, advanced and
-finished from any thread, and `remote()` extends the group to worker processes
-through `remote/`.
-
-Calling code depends only on two protocols: `ProgressBarSource`, implemented by
-the local group and its remote proxy, and `ProgressTask`, implemented by the
-bars they hand out. The same code therefore runs in the parent process and in a
-worker.
+Bars that run side by side. `ProgressBarGroup` draws them through one backend and can be used from any thread, and
+`remote()` extends it to worker processes; code typed against `ProgressBarSource` and `ProgressTask` runs unchanged in
+the parent and in a worker.
 
 ## Components
 
@@ -25,7 +17,7 @@ worker.
 | [snapshot.py](snapshot.py) | `ProgressBarSnapshot`, how far one open bar is at one moment, read by `ProgressBarGroup.snapshot()`. |
 | [renderer.py](renderer.py) | `ProgressGroupRenderer`, the abstract lifecycle of a group shared by the backends that support it. |
 | [factory.py](factory.py) | `GroupRendererFactory`, which imports and instantiates the group renderer of a backend. |
-| [remote/](remote/) | Bars of worker processes, forwarded through a queue to the group of their parent. |
+| [remote/](remote/README.md) | Bars of worker processes, forwarded through a queue to the group of their parent. |
 
 ## Examples
 

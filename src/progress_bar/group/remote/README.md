@@ -2,18 +2,8 @@
 
 ## Overview
 
-Bars of worker processes, rendered by the `ProgressBarGroup` of their parent.
-`ProgressBarGroup.remote()` returns a `RemoteProgressBarGroup`, a picklable
-proxy holding a `multiprocessing` queue. A worker adds bars through it exactly
-as through the group itself, since both implement `ProgressBarSource`, and each
-`RemoteProgressBar` sends `RemoteBarOpened`, `RemoteBarAdvanced` and
-`RemoteBarFinished` events instead of drawing anything. A `RemoteEventListener`
-thread in the parent applies them to the group, so the bars of every process
-share one display. Steps are coalesced in the worker and sent at most every
-0.1 seconds, and events about a bar the group no longer shows are ignored.
-
-The queue can only reach a child process through inheritance, so hand the proxy
-over when the process is created, for example through the `initializer` and
+Bars of worker processes, rendered by the `ProgressBarGroup` of their parent through the picklable proxy returned by
+`ProgressBarGroup.remote()`. Hand the proxy over when the process is created, for example through the `initializer` and
 `initargs` of `ProcessPoolExecutor`.
 
 ## Components

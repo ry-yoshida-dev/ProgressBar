@@ -2,14 +2,8 @@
 
 ## Overview
 
-Pytest suite covering backend metadata, resolution rules, the reporter and group
-lifecycles, bars of worker processes and the rendering of every backend. The core tests never rely on an optional
-library being installed: they use the silent and plain backends with a stubbed
-output stream, and a stubbed module lookup when an uninstalled package has to
-be simulated. The renderers of the optional libraries are exercised when their
-package is present and skipped otherwise.
-
-Run them with `pytest` from the repository root.
+Pytest suite covering backend metadata, resolution rules, the reporter and group lifecycles, bars of worker processes and
+the rendering of every backend. Tests of optional libraries are skipped when their package is missing.
 
 ## Components
 

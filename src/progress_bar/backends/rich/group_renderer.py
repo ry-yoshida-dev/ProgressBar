@@ -26,6 +26,7 @@ class RichGroupRenderer(ProgressGroupRenderer):
     ``rich`` allows a single live display per console, so the whole group
     shares one :class:`rich.progress.Progress`. A finished bar that stays
     visible remains as a completed task, and any other bar is removed.
+    Descriptions are escaped, so square brackets are shown as written.
 
     Parameters
     ----------

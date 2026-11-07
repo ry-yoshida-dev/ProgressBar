@@ -13,6 +13,10 @@ from progress_bar.settings import ProgressSettings
 class ProgressBar2Renderer(ProgressRenderer):
     """Renderer using the ``progressbar2`` package.
 
+    The bar is updated with absolute values, so the accumulated step count
+    is forwarded, and an unknown total is expressed as
+    ``progressbar.UnknownLength``. The importable module is ``progressbar``.
+
     Parameters
     ----------
     settings
