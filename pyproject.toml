@@ -65,3 +65,6 @@ pythonVersion = "3.12"
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "-q"
+
+[tool.uv]
+exclude-newer = "7 days"
